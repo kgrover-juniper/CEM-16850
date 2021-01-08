@@ -26,7 +26,7 @@ def check_services_status():
                     line = reader.readline()
                 docker_status = True
             if docker_status is True:
-                if "active" not in line and not any(cs in line for cs in contrail_services) and line!='\n' and "exit" not in line:
+                if ("active" not in line or "backup" not in line) and not any(cs in line for cs in contrail_services) and line!='\n' and "exit" not in line:
                     return "Error in Services"
             line = reader.readline()
 
