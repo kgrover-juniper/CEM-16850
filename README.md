@@ -19,6 +19,7 @@ $ python juju-python-ziu.py -c 2011.138-ubi
 
 
 # Validate Contrail Services
+Finds the leader amongst the contrail-controller and verifies services
 ```sh
 $ python validate_services.py ubi-queens-2011-138
 ```

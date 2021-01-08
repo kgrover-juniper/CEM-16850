@@ -22,21 +22,32 @@ def check_services_status():
                 line = reader.readline()
                 for i in range(dockers):
                     if version not in line and (status1 not in line or status2 not in line) and line!='\n':
+                        print line
                         return "Error in Services"
                     line = reader.readline()
                 docker_status = True
             if docker_status is True:
-                if ("active" not in line or "backup" not in line) and not any(cs in line for cs in contrail_services) and line!='\n' and "exit" not in line:
+                if "active" not in line and not any(cs in line for cs in contrail_services) and line!='\n' and "exit" not in line:
+                    print line
                     return "Error in Services"
             line = reader.readline()
 
 
 def get_controller_services():
-    c1 = subprocess.Popen(["/snap/bin/juju", "show-unit", "contrail-controller/0"],stdout=subprocess.PIPE)
-    c2 = subprocess.Popen(["grep", "public-address"],stdin=c1.stdout,stdout=subprocess.PIPE)
-    addr = c2.communicate()[0]
+    n = 0
+    leader_found = False
+    while leader_found==False:
+        c1 = subprocess.Popen(["/snap/bin/juju", "show-unit", "contrail-controller/"+str(n)],stdout=subprocess.PIPE)
+        c2 = subprocess.Popen(["grep", "leader"],stdin=c1.stdout,stdout=subprocess.PIPE)
+        lead = c2.communicate()[0]
+        if "true" not in lead:
+            n += 1
+        else:
+            leader_found = True
+    c3 = subprocess.Popen(["grep", "public-address"],stdin=c1.stdout,stdout=subprocess.PIPE)
+    addr = c3.communicate()[0]
     addrlen = len("public-address: ")
-    ip = addr[aadrlen+2:]
+    ip = addr[addrlen+2:]
     child = pexpect.spawn('ssh ubuntu@'+ip)
     child.waitnoecho()
     child.sendline ('sudo docker ps | wc -l')
