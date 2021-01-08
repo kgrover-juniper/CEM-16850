@@ -17,11 +17,11 @@ def check_services_status():
         line = reader.readline()
         while line != '':
             if "$ sudo docker ps | wc -l" in line:
-                dockers = int(reader.readline())+1
+                dockers = int(reader.readline())
             elif "Original Version" in line and "State" in line:
                 line = reader.readline()
                 for i in range(dockers):
-                    if version not in line and (status1 not in line or status2 not in line):
+                    if version not in line and (status1 not in line or status2 not in line) and line!='\n':
                         return "Error in Services"
                     line = reader.readline()
                 docker_status = True
@@ -32,7 +32,12 @@ def check_services_status():
 
 
 def get_controller_services():
-    child = pexpect.spawn('ssh ubuntu@10.84.49.131')
+    c1 = subprocess.Popen(["/snap/bin/juju", "show-unit", "contrail-controller/0"],stdout=subprocess.PIPE)
+    c2 = subprocess.Popen(["grep", "public-address"],stdin=c1.stdout,stdout=subprocess.PIPE)
+    addr = c2.communicate()[0]
+    addrlen = len("public-address: ")
+    ip = addr[aadrlen+2:]
+    child = pexpect.spawn('ssh ubuntu@'+ip)
     child.waitnoecho()
     child.sendline ('sudo docker ps | wc -l')
     child.sendline ('sudo contrail-status')
