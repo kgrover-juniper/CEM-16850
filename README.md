@@ -8,7 +8,7 @@ Required files:
 3. agent-upgrade.sh (modify as required)
 4. validate_services.py 
 
-# Run Upgrade
+# STEP 1: Run Upgrade (JuJu ZIU test-case-1 and test-case-2)
 ```sh
 $ python juju-python-ziu.py -c 2011.138-ubi
 ```
@@ -18,8 +18,13 @@ $ python juju-python-ziu.py -c 2011.138-ubi
  result.txt #Comment on/off write_result() in main() of juju-python-ziu.py
 
 
-# Validate Contrail Services
+# STEP 2: Validate Contrail Services (JuJu ZIU test-case-3)
 Finds the leader amongst the contrail-controller and verifies services
 ```sh
 $ python validate_services.py ubi-queens-2011-138
+```
+
+# STEP 3: Validate the creation of openstack VM (JuJu ZIU test-case-4)
+```sh
+$ python create_vm.py
 ```
