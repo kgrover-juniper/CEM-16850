@@ -1,6 +1,7 @@
 #!usr/bin/python
 import time
 import pexpect
+import subprocess
 
 def create_openstack_instance():
     child = pexpect.spawn('juju ssh contrail-agent/0')
@@ -15,7 +16,7 @@ def create_openstack_instance():
     child.sendline ('gunzip cirros-traffic.vmdk.gz')
     child.sendline ('openstack image create --file cirros-traffic.vmdk --container-format bare --disk-format vmdk --property vmware_disktype="sparse" --property vmware_adaptertype="ide" cirros-test')
     child.sendline ('openstack server create --flavor tiny --image cirros-test --network test-upgrade test-instance')
-    time.sleep(50)
+    time.sleep(100)
     child.sendline ('openstack server list')
     global filename
     filename = "/tmp/instance.log"
@@ -24,6 +25,7 @@ def create_openstack_instance():
     child.sendline('exit')
 
 def verify_instance_status():
+    cmd = subprocess.call(["sed", "-i", 's/\r//g', filename])
     with open(filename, 'r') as reader:
         line = reader.readline()
         while line != '':
@@ -31,7 +33,7 @@ def verify_instance_status():
                 if "ACTIVE" not in line:
                     return "Error in VM creation"
                 else:
-                    return "VM creation verified: JuJu ZIU test-case-4 passed"
+                    return "VM creation verified: JuJu ZIU openstack instance creation passed"
             line = reader.readline()
 
 def main():

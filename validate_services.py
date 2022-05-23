@@ -26,8 +26,10 @@ def check_services_status():
                     line = reader.readline()
                 docker_status = True
             if docker_status is True:
-                if "active" not in line and not any(cs in line for cs in contrail_services) and line!='\n' and "exit" not in line:
-                    return "Error in Services"
+                #if "active" not in line and not any(cs in line for cs in contrail_services) and line!='\n' and "exit" not in line:
+                if line!='\n' and "exit" not in line and not any(cs in line for cs in contrail_services):
+                    if "active" not in line and "backup" not in line:
+                        return "Error in Services"
             line = reader.readline()
 
 
@@ -42,11 +44,6 @@ def get_controller_services():
             n += 1
         else:
             leader_found = True
-    #c3 = subprocess.Popen(["grep", "public-address"],stdin=c1.stdout,stdout=subprocess.PIPE)
-    #addr = c3.communicate()[0]
-    #addrlen = len("public-address: ")
-    #ip = addr[addrlen+2:]
-    #child = pexpect.spawn('ssh ubuntu@'+ip)
     child = pexpect.spawn('juju ssh contrail-controller/'+str(n))
     child.waitnoecho()
     child.sendline ('sudo docker ps | wc -l')
@@ -60,7 +57,9 @@ def get_controller_services():
 def main():
     get_controller_services()
     if None==(check_services_status()):
-        print "Services Verified"
-    
+        print "Services Verified: JuJu ZIU Validated status and connectivity passed"
+    else:
+        print(check_services_status())
+
 if __name__ == "__main__":
     main()
